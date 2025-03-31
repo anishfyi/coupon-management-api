@@ -1,0 +1,474 @@
+{
+	"info": {
+		"_postman_id": "a890c7e3-c59a-49aa-8ed7-a5c7b89c0b3c",
+		"name": "Coupon Management API",
+		"description": "A collection for testing the Coupon Management API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Coupon Management",
+			"item": [
+				{
+					"name": "Create Cart-wise Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"cart-wise\",\n  \"code\": \"CART10\",\n  \"name\": \"10% Off on Orders Above $100\",\n  \"description\": \"Get 10% off on your entire cart when you spend over $100\",\n  \"is_active\": true,\n  \"expires_at\": \"2025-12-31T23:59:59Z\",\n  \"cart_wise_details\": {\n    \"discount_type\": \"percentage\",\n    \"threshold\": 100.00,\n    \"discount_value\": 10.00\n  }\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"coupons",
+								""
+							]
+						},
+						"description": "Create a cart-wise coupon with 10% discount on orders over $100"
+					}
+				},
+				{
+					"name": "Create Product-wise Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"product-wise\",\n  \"code\": \"PROD20\",\n  \"name\": \"20% Off on Product #1\",\n  \"description\": \"Get 20% off on Product #1\",\n  \"is_active\": true,\n  \"product_wise_details\": {\n    \"discount_type\": \"percentage\",\n    \"product_id\": 1,\n    \"discount_value\": 20.00\n  }\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"coupons",
+								""
+							]
+						},
+						"description": "Create a product-wise coupon with 20% discount on Product #1"
+					}
+				},
+				{
+					"name": "Create BxGy Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"bxgy\",\n  \"code\": \"B2G1FREE\",\n  \"name\": \"Buy 2 Get 1 Free\",\n  \"description\": \"Buy 2 of Product #1, get 1 of Product #3 free\",\n  \"is_active\": true,\n  \"bxgy_details\": {\n    \"repetition_limit\": 3,\n    \"buy_products\": [\n      {\n        \"product_id\": 1,\n        \"quantity\": 2\n      }\n    ],\n    \"get_products\": [\n      {\n        \"product_id\": 3,\n        \"quantity\": 1\n      }\n    ]\n  }\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"coupons",
+								""
+							]
+						},
+						"description": "Create a BxGy coupon: Buy 2 of Product #1, get 1 of Product #3 free"
+					}
+				},
+				{
+					"name": "Get All Coupons",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"coupons",
+								""
+							]
+						},
+						"description": "Retrieve all coupons"
+					}
+				},
+				{
+					"name": "Get Coupon by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/coupons/{{coupon_id}}/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"coupons",
+								"{{coupon_id}}",
+								""
+							]
+						},
+						"description": "Retrieve a specific coupon by ID"
+					}
+				},
+				{
+					"name": "Update Coupon",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"cart-wise\",\n  \"code\": \"CART15\",\n  \"name\": \"15% Off on Orders Above $100\",\n  \"description\": \"Get 15% off on your entire cart when you spend over $100\",\n  \"is_active\": true,\n  \"cart_wise_details\": {\n    \"discount_type\": \"percentage\",\n    \"threshold\": 100.00,\n    \"discount_value\": 15.00\n  }\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/coupons/{{coupon_id}}/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"coupons",
+								"{{coupon_id}}",
+								""
+							]
+						},
+						"description": "Update a specific coupon by ID"
+					}
+				},
+				{
+					"name": "Delete Coupon",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/coupons/{{coupon_id}}/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"coupons",
+								"{{coupon_id}}",
+								""
+							]
+						},
+						"description": "Delete a specific coupon by ID"
+					}
+				}
+			],
+			"description": "CRUD operations for coupon management"
+		},
+		{
+			"name": "Coupon Application",
+			"item": [
+				{
+					"name": "Get Applicable Coupons",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 3,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 2,\n      \"price\": 30.00\n    },\n    {\n      \"product_id\": 3,\n      \"quantity\": 1,\n      \"price\": 25.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/applicable-coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"applicable-coupons",
+								""
+							]
+						},
+						"description": "Get all applicable coupons for a cart"
+					}
+				},
+				{
+					"name": "Apply Coupon",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 3,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 2,\n      \"price\": 30.00\n    },\n    {\n      \"product_id\": 3,\n      \"quantity\": 1,\n      \"price\": 25.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/apply-coupon/{{coupon_id}}/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"apply-coupon",
+								"{{coupon_id}}",
+								""
+							]
+						},
+						"description": "Apply a specific coupon to a cart"
+					}
+				}
+			],
+			"description": "Operations for applying coupons to a cart"
+		},
+		{
+			"name": "Testing Scenarios",
+			"item": [
+				{
+					"name": "Cart Below Threshold",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 1,\n      \"price\": 50.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/applicable-coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"applicable-coupons",
+								""
+							]
+						},
+						"description": "Test with a cart below the threshold (should not include cart-wise coupon)"
+					}
+				},
+				{
+					"name": "Product Not in Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 2,\n      \"quantity\": 1,\n      \"price\": 30.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/applicable-coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"applicable-coupons",
+								""
+							]
+						},
+						"description": "Test with a cart that doesn't contain Product #1 (should not include product-wise coupon)"
+					}
+				},
+				{
+					"name": "Insufficient Buy Products",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 1,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 3,\n      \"quantity\": 1,\n      \"price\": 25.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/applicable-coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"applicable-coupons",
+								""
+							]
+						},
+						"description": "Test with insufficient quantity of buy products (should not include BxGy coupon)"
+					}
+				},
+				{
+					"name": "Category Discount",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 5,\n      \"quantity\": 2,\n      \"price\": 100.00,\n      \"category\": \"electronics\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/applicable-coupons/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"applicable-coupons",
+								""
+							]
+						},
+						"description": "Test with a product in the electronics category (requires creating a category-based coupon first)"
+					}
+				},
+				{
+					"name": "Multiple Repetitions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 6,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 3,\n      \"quantity\": 3,\n      \"price\": 25.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/apply-coupon/{{coupon_id}}/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"apply-coupon",
+								"{{coupon_id}}",
+								""
+							]
+						},
+						"description": "Test with multiple repetitions of a BxGy coupon (should apply discount multiple times up to the repetition limit)"
+					}
+				}
+			],
+			"description": "Various testing scenarios for the coupon system"
+		}
+	],
+	"variable": [
+		{
+			"key": "coupon_id",
+			"value": "Replace with a valid coupon UUID"
+		}
+	]
+} 
