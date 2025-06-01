@@ -1,19 +1,67 @@
 # Coupon Management API Testing Guide
 
-This document provides step-by-step instructions for testing the Coupon Management API using Postman.
+This document provides comprehensive instructions for testing the Coupon Management API using Postman, including environment setup, testing workflows, and best practices.
+
+## Table of Contents
+1. [Setup](#setup)
+2. [Environment Configuration](#environment-configuration)
+3. [Testing Workflows](#testing-workflows)
+4. [API Endpoints](#api-endpoints)
+5. [Best Practices](#best-practices)
+6. [Troubleshooting](#troubleshooting)
 
 ## Setup
 
-1. Ensure the development server is running:
+1. **Install Postman**
+   - Download and install Postman from [postman.com](https://www.postman.com/downloads/)
+   - Create a free account to save your collections and environments
+
+2. **Start the Development Server**
    ```bash
    python manage.py runserver
    ```
 
-2. The API will be available at `http://127.0.0.1:8000/`
+3. **Import the Postman Collection**
+   - Download the collection JSON file from the repository
+   - In Postman, click "Import" → "File" → Select the collection file
+   - The collection will be imported with all endpoints pre-configured
 
-3. Import the Postman collection (optional):
-   - Download the collection JSON file from the repository (if available)
-   - In Postman, click "Import" and select the collection file
+## Environment Configuration
+
+1. **Create a New Environment**
+   - Click "Environments" → "Create Environment"
+   - Name it "Coupon API Local"
+   - Add the following variables:
+     ```
+     base_url: http://127.0.0.1:8000
+     api_version: v1
+     ```
+
+2. **Environment Variables Usage**
+   - Use `{{base_url}}/api/` in your requests
+   - This makes it easy to switch between environments (local, staging, production)
+
+## Testing Workflows
+
+### 1. Basic Coupon Management Flow
+1. Create a new coupon (POST /api/coupons/)
+2. Verify the coupon was created (GET /api/coupons/{{coupon_id}}/)
+3. Update the coupon (PUT /api/coupons/{{coupon_id}}/)
+4. Delete the coupon (DELETE /api/coupons/<coupon_id>/)
+
+### 2. Coupon Application Flow
+1. Create multiple coupons of different types
+2. Get applicable coupons for a cart (POST /api/applicable-coupons/)
+3. Apply a specific coupon (POST /api/apply-coupon/<coupon_id>/)
+4. Verify the discount calculations
+
+### 3. Edge Cases to Test
+1. Expired coupons
+2. Inactive coupons
+3. Invalid coupon codes
+4. Cart totals below threshold
+5. Product quantities exceeding limits
+6. Multiple applicable coupons
 
 ## Authentication
 
@@ -97,29 +145,29 @@ The current implementation doesn't require authentication for API endpoints.
 - Method: GET
 - URL: `http://127.0.0.1:8000/api/coupons/`
 
-#### 1.3. Get Coupon by ID (GET /api/coupons/{id}/)
+#### 1.3. Get Coupon by ID (GET /api/coupons/{{coupon_id}}/)
 
 **Request:**
 - Method: GET
-- URL: `http://127.0.0.1:8000/api/coupons/{id}/`
-  - Replace `{id}` with the UUID of the coupon
+- URL: `http://127.0.0.1:8000/api/coupons/{{coupon_id}}/`
+  - Replace `coupon_id` with the UUID of the coupon
 
-#### 1.4. Update Coupon (PUT /api/coupons/{id}/)
+#### 1.4. Update Coupon (PUT /api/coupons/{{coupon_id}}/)
 
 **Request:**
 - Method: PUT
-- URL: `http://127.0.0.1:8000/api/coupons/{id}/`
-  - Replace `{id}` with the UUID of the coupon
+- URL: `http://127.0.0.1:8000/api/coupons/{{coupon_id}}/`
+  - Replace `{{coupon_id}}` with the UUID of the coupon
 - Headers:
   - Content-Type: application/json
 - Body: Same format as create coupon, but with fields you want to update
 
-#### 1.5. Delete Coupon (DELETE /api/coupons/{id}/)
+#### 1.5. Delete Coupon (DELETE /api/coupons/<coupon_id>/)
 
 **Request:**
 - Method: DELETE
-- URL: `http://127.0.0.1:8000/api/coupons/{id}/`
-  - Replace `{id}` with the UUID of the coupon
+- URL: `http://127.0.0.1:8000/api/coupons/<coupon_id>/`
+  - Replace `<coupon_id>` with the UUID of the coupon
 
 ### 2. Coupon Application
 
@@ -176,12 +224,12 @@ The current implementation doesn't require authentication for API endpoints.
 }
 ```
 
-#### 2.2. Apply Coupon (POST /api/apply-coupon/{id}/)
+#### 2.2. Apply Coupon (POST /api/apply-coupon/<coupon_id>/)
 
 **Request:**
 - Method: POST
-- URL: `http://127.0.0.1:8000/api/apply-coupon/{id}/`
-  - Replace `{id}` with the UUID of the coupon
+- URL: `http://127.0.0.1:8000/api/apply-coupon/<coupon_id>/`
+  - Replace `<coupon_id>` with the UUID of the coupon
 - Headers:
   - Content-Type: application/json
 - Body:
@@ -322,13 +370,58 @@ The current implementation doesn't require authentication for API endpoints.
 1. Create a coupon with an expiration date in the past
 2. Attempt to apply the coupon (should fail with an appropriate error message)
 
+## Best Practices
+
+1. **Request Organization**
+   - Use folders in your collection to group related endpoints
+   - Name your requests descriptively
+   - Add request descriptions for complex endpoints
+
+2. **Test Scripts**
+   - Add test scripts to verify responses
+   - Example test script for coupon creation:
+   ```javascript
+   pm.test("Status code is 201", function () {
+       pm.response.to.have.status(201);
+   });
+   
+   pm.test("Response has required fields", function () {
+       const response = pm.response.json();
+       pm.expect(response).to.have.property('id');
+       pm.expect(response).to.have.property('code');
+       pm.expect(response).to.have.property('type');
+   });
+   ```
+
+3. **Variables and Dynamic Data**
+   - Use collection variables for common values
+   - Extract response values to variables for use in subsequent requests
+   - Example: Extract coupon ID from create response:
+   ```javascript
+   const response = pm.response.json();
+   pm.collectionVariables.set("coupon_id", response.id);
+   ```
+
+4. **Request Headers**
+   - Always include `Content-Type: application/json`
+   - Add custom headers if required by your implementation
+
 ## Troubleshooting
 
-### Common Issues:
+1. **Common Issues**
+   - 404 Not Found: Verify the server is running and URL is correct
+   - 400 Bad Request: Check request body format and required fields
+   - 500 Server Error: Check server logs for detailed error messages
 
-1. **404 Not Found**: Verify the URL is correct and the server is running.
-2. **400 Bad Request**: Check your request body for formatting issues or missing required fields.
-3. **500 Internal Server Error**: Check the server logs for detailed error information.
+2. **Debugging Tips**
+   - Use Postman Console (View → Show Postman Console)
+   - Enable verbose logging in your Django settings
+   - Check response headers for additional information
+
+3. **Performance Testing**
+   - Use Postman's Collection Runner for load testing
+   - Monitor response times
+   - Test with various payload sizes
 
 ### UUID Format:
 

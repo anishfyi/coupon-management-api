@@ -43,9 +43,9 @@ class BxGyCouponSerializer(serializers.ModelSerializer):
 
 
 class CouponSerializer(serializers.ModelSerializer):
-    cart_wise_details = CartWiseCouponSerializer(required=False)
-    product_wise_details = ProductWiseCouponSerializer(required=False)
-    bxgy_details = BxGyCouponSerializer(required=False)
+    cart_wise_details = CartWiseCouponSerializer(required=False, allow_null=True)
+    product_wise_details = ProductWiseCouponSerializer(required=False, allow_null=True)
+    bxgy_details = BxGyCouponSerializer(required=False, allow_null=True)
     
     class Meta:
         model = Coupon
@@ -55,6 +55,39 @@ class CouponSerializer(serializers.ModelSerializer):
             'cart_wise_details', 'product_wise_details', 'bxgy_details'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def validate(self, data):
+        """
+        Custom validation to ensure only the relevant coupon type details are provided
+        """
+        coupon_type = data.get('type', getattr(self.instance, 'type', None))
+        
+        # If type is not provided and we don't have an instance, raise error
+        if not coupon_type and not self.instance:
+            raise serializers.ValidationError("Coupon type is required")
+        
+        # If we have an instance, use its type if not provided in update
+        if not coupon_type and self.instance:
+            coupon_type = self.instance.type
+        
+        # Validate that only the relevant coupon type details are provided
+        if coupon_type == 'cart-wise':
+            if 'product_wise_details' in data and data['product_wise_details'] is not None:
+                raise serializers.ValidationError("product_wise_details should not be provided for cart-wise coupons")
+            if 'bxgy_details' in data and data['bxgy_details'] is not None:
+                raise serializers.ValidationError("bxgy_details should not be provided for cart-wise coupons")
+        elif coupon_type == 'product-wise':
+            if 'cart_wise_details' in data and data['cart_wise_details'] is not None:
+                raise serializers.ValidationError("cart_wise_details should not be provided for product-wise coupons")
+            if 'bxgy_details' in data and data['bxgy_details'] is not None:
+                raise serializers.ValidationError("bxgy_details should not be provided for product-wise coupons")
+        elif coupon_type == 'bxgy':
+            if 'cart_wise_details' in data and data['cart_wise_details'] is not None:
+                raise serializers.ValidationError("cart_wise_details should not be provided for bxgy coupons")
+            if 'product_wise_details' in data and data['product_wise_details'] is not None:
+                raise serializers.ValidationError("product_wise_details should not be provided for bxgy coupons")
+        
+        return data
     
     def create(self, validated_data):
         coupon_type = validated_data.get('type')
@@ -90,56 +123,79 @@ class CouponSerializer(serializers.ModelSerializer):
         return coupon
     
     def update(self, instance, validated_data):
+        # Get the coupon type - use existing type if not provided in update
         coupon_type = validated_data.get('type', instance.type)
         
-        # Extract nested data based on coupon type
-        cart_wise_data = validated_data.pop('cart_wise_details', None)
-        product_wise_data = validated_data.pop('product_wise_details', None)
-        bxgy_data = validated_data.pop('bxgy_details', None)
-        
-        # Update the base coupon
-        instance = super().update(instance, validated_data)
-        
-        # Update the specific coupon type details
-        if coupon_type == 'cart-wise' and cart_wise_data:
-            cart_wise_coupon, created = CartWiseCoupon.objects.get_or_create(coupon=instance)
-            for key, value in cart_wise_data.items():
-                setattr(cart_wise_coupon, key, value)
-            cart_wise_coupon.save()
-        
-        elif coupon_type == 'product-wise' and product_wise_data:
-            product_wise_coupon, created = ProductWiseCoupon.objects.get_or_create(coupon=instance)
-            for key, value in product_wise_data.items():
-                setattr(product_wise_coupon, key, value)
-            product_wise_coupon.save()
-        
-        elif coupon_type == 'bxgy' and bxgy_data:
-            buy_products_data = bxgy_data.pop('buy_products', [])
-            get_products_data = bxgy_data.pop('get_products', [])
+        # Only process the details for the current coupon type
+        if coupon_type == 'cart-wise':
+            cart_wise_data = validated_data.pop('cart_wise_details', None)
+            validated_data.pop('product_wise_details', None)  # Ignore other types
+            validated_data.pop('bxgy_details', None)  # Ignore other types
             
-            # Update BxGy coupon
-            bxgy_coupon, created = BxGyCoupon.objects.get_or_create(coupon=instance)
-            for key, value in bxgy_data.items():
-                setattr(bxgy_coupon, key, value)
-            bxgy_coupon.save()
+            # Update the base coupon
+            instance = super().update(instance, validated_data)
             
-            # Handle buy products
-            if buy_products_data:
-                # Delete existing buy products
-                bxgy_coupon.buy_products.all().delete()
+            # Update cart-wise details if provided
+            if cart_wise_data:
+                cart_wise_coupon, created = CartWiseCoupon.objects.get_or_create(coupon=instance)
+                for key, value in cart_wise_data.items():
+                    setattr(cart_wise_coupon, key, value)
+                cart_wise_coupon.save()
+            
+        elif coupon_type == 'product-wise':
+            product_wise_data = validated_data.pop('product_wise_details', None)
+            validated_data.pop('cart_wise_details', None)  # Ignore other types
+            validated_data.pop('bxgy_details', None)  # Ignore other types
+            
+            # Update the base coupon
+            instance = super().update(instance, validated_data)
+            
+            # Update product-wise details if provided
+            if product_wise_data:
+                product_wise_coupon, created = ProductWiseCoupon.objects.get_or_create(coupon=instance)
+                for key, value in product_wise_data.items():
+                    setattr(product_wise_coupon, key, value)
+                product_wise_coupon.save()
+            
+        elif coupon_type == 'bxgy':
+            bxgy_data = validated_data.pop('bxgy_details', None)
+            validated_data.pop('cart_wise_details', None)  # Ignore other types
+            validated_data.pop('product_wise_details', None)  # Ignore other types
+            
+            # Update the base coupon
+            instance = super().update(instance, validated_data)
+            
+            # Update bxgy details if provided
+            if bxgy_data:
+                buy_products_data = bxgy_data.pop('buy_products', [])
+                get_products_data = bxgy_data.pop('get_products', [])
                 
-                # Create new buy products
-                for buy_product_data in buy_products_data:
-                    BxGyCouponBuyProduct.objects.create(bxgy_coupon=bxgy_coupon, **buy_product_data)
-            
-            # Handle get products
-            if get_products_data:
-                # Delete existing get products
-                bxgy_coupon.get_products.all().delete()
+                # Update BxGy coupon
+                bxgy_coupon, created = BxGyCoupon.objects.get_or_create(coupon=instance)
+                for key, value in bxgy_data.items():
+                    setattr(bxgy_coupon, key, value)
+                bxgy_coupon.save()
                 
-                # Create new get products
-                for get_product_data in get_products_data:
-                    BxGyCouponGetProduct.objects.create(bxgy_coupon=bxgy_coupon, **get_product_data)
+                # Handle buy products
+                if buy_products_data:
+                    # Delete existing buy products
+                    bxgy_coupon.buy_products.all().delete()
+                    
+                    # Create new buy products
+                    for buy_product_data in buy_products_data:
+                        BxGyCouponBuyProduct.objects.create(bxgy_coupon=bxgy_coupon, **buy_product_data)
+                
+                # Handle get products
+                if get_products_data:
+                    # Delete existing get products
+                    bxgy_coupon.get_products.all().delete()
+                    
+                    # Create new get products
+                    for get_product_data in get_products_data:
+                        BxGyCouponGetProduct.objects.create(bxgy_coupon=bxgy_coupon, **get_product_data)
+        else:
+            # If no specific type details to update, just update the base coupon
+            instance = super().update(instance, validated_data)
         
         return instance
 
