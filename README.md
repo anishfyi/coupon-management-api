@@ -43,7 +43,10 @@ cd coupon-management-api
 2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -56,10 +59,30 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-5. Start the development server:
+5. (Optional) Create a superuser for Django admin:
+```bash
+python manage.py createsuperuser
+```
+
+6. Start the development server:
 ```bash
 python manage.py runserver
 ```
+
+7. Access the API documentation:
+- Swagger UI: [http://localhost:8000/](http://localhost:8000/)
+- Redoc: [http://localhost:8000/redoc/](http://localhost:8000/redoc/)
+
+8. (Optional) Access the Django admin:
+- [http://localhost:8000/admin/](http://localhost:8000/admin/)
+
+---
+
+**Notes:**
+- The default database is SQLite; no additional setup is required.
+- All API endpoints are public (no authentication by default).
+- Product IDs are assumed to be valid and managed externally.
+- For Windows users, use `venv\Scripts\activate` to activate the virtual environment.
 
 ## API Endpoints
 
